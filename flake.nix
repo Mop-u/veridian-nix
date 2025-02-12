@@ -16,14 +16,20 @@
             libfmt = fmt_11;
             libboost = boost182;
             slang-git = let 
-                version = "7.0";
+                version = "8.0";
+                fmtsrc = fetchFromGitHub {
+                    owner = "fmtlib";
+                    repo = "fmt";
+                    rev = "11.1.3";
+                    hash = "sha256-6r9D/csVSgS+T/H0J8cSR+YszxnH/h2V2odi2s6VYN8=";
+                };
             in sv-lang.overrideAttrs{
                 inherit version;
                 src = fetchFromGitHub {
                     owner = "MikePopoloski";
                     repo = "slang";
                     rev = "v${version}";
-                    hash = "sha256-msSc6jw2xbEZfOwtqwFEDIKcwf5SDKp+j15lVbNO98g=";
+                    hash = "sha256-UZwMxnzprOjN5DlV1zLd0I6rgrBMBhcZ+dSx8t2sJF8=";
                 };
                 cmakeFlags = [
                     # fix for https://github.com/NixOS/nixpkgs/issues/144170
@@ -32,6 +38,7 @@
 
                     "-DSLANG_INCLUDE_TESTS=${if !stdenv.hostPlatform.isDarwin then "ON" else "OFF"}"
                     "-DSLANG_USE_MIMALLOC=OFF"
+                    "-DFETCHCONTENT_SOURCE_DIR_FMT=${fmtsrc}"
                 ];
                 nativeBuildInputs = [
                     cmake
@@ -100,6 +107,21 @@
                              .out_dir(wrapper_install)
                              .build();
                      }
+                '')
+                (writeText "slang-version-patch" ''
+                    diff --git a/veridian-slang/slang_wrapper/CMakeLists.txt b/veridian-slang/slang_wrapper/CMakeLists.txt
+                    index a3cf824..9941e92 100644
+                    --- a/veridian-slang/slang_wrapper/CMakeLists.txt
+                    +++ b/veridian-slang/slang_wrapper/CMakeLists.txt
+                    @@ -6,7 +6,7 @@ project(
+                     )
+                     
+                     # Keep the version the same as the one in `build.rs`
+                    -find_package(slang 7.0 REQUIRED)
+                    +find_package(slang 8.0 REQUIRED)
+                     
+                     set(CMAKE_CXX_STANDARD 20)
+                     set(CMAKE_CXX_STANDARD_REQUIRED ON)
                 '')
             ];
 
