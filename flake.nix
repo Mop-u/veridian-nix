@@ -59,7 +59,7 @@
             };
         in rustPlatform.buildRustPackage {
             inherit system;
-            name = "veridian";
+            pname = "veridian";
             version = "git-${builtins.substring 0 6 inputs.veridian.rev}";
             src = inputs.veridian;
             useFetchCargoVendor = true;
