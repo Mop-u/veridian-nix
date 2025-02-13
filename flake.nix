@@ -13,16 +13,18 @@
         pkgs = nixpkgs.legacyPackages.${system};
     in { 
         packages.veridian = with pkgs; let
-            libfmt = fmt_11;
-            libboost = boost182;
+            # slang 8.0 wants at least fmt 11.1
+            fmtver = "11.1.3";
+            fmtsrc = fetchFromGitHub {
+                owner = "fmtlib";
+                repo = "fmt";
+                rev = fmtver;
+                hash = "sha256-6r9D/csVSgS+T/H0J8cSR+YszxnH/h2V2odi2s6VYN8=";
+            };
+            fmtlib = fmt.overrideAttrs{ version = fmtver; src = fmtsrc; };
+            boostlib = boost182;
             slang-git = let 
                 version = "8.0";
-                fmtsrc = fetchFromGitHub {
-                    owner = "fmtlib";
-                    repo = "fmt";
-                    rev = "11.1.3";
-                    hash = "sha256-6r9D/csVSgS+T/H0J8cSR+YszxnH/h2V2odi2s6VYN8=";
-                };
             in sv-lang.overrideAttrs{
                 inherit version;
                 src = fetchFromGitHub {
@@ -59,8 +61,8 @@
                           cmake
                         ];
                     })
-                    libboost
-                    libfmt
+                    boostlib
+                    fmtlib
                     catch2_3
                 ];
             };
@@ -88,7 +90,7 @@
             ];
             buildInputs = [
                 #verilator
-                libfmt
+                fmtlib
                 verible
                 slang-git
             ];
@@ -103,7 +105,7 @@
                          cmake::Config::new("slang_wrapper")
                              .profile("Release")
                     -        .define("CMAKE_PREFIX_PATH", slang)
-                    +        .define("CMAKE_PREFIX_PATH", slang.join(";${libfmt.dev};${libboost.dev}"))
+                    +        .define("CMAKE_PREFIX_PATH", slang.join(";${fmtlib.dev};${boostlib.dev}"))
                              .out_dir(wrapper_install)
                              .build();
                      }
