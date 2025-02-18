@@ -88,12 +88,7 @@
                 verilator
                 verible
             ];
-            buildInputs = [
-                #verilator
-                fmtlib
-                verible
-                slang-git
-            ];
+            buildInputs = [ fmtlib ];
             patches = [
                 (writeText "slang-cmake-patch" ''
                     diff --git a/veridian-slang/build.rs b/veridian-slang/build.rs
